@@ -1,0 +1,6 @@
+apiVersion: v2
+name: nfd
+description: Necessary configuration for Node Feature Discovery operator to properly label GPU nodes for the GPU operators
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

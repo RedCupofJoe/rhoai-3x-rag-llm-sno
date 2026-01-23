@@ -1,0 +1,94 @@
+clusterGroup:
+  name: prod
+
+  namespaces:
+    - rag-llm-sno
+    - openshift-nfd
+    - nvidia-gpu-operator
+    - redhat-ods-operator:
+        operatorGroup: true
+        targetNamespaces: []
+    - openshift-serverless:
+        operatorGroup: true
+        targetNamespaces: []
+    - openshift-storage:
+        operatorGroup: true
+        targetNamespaces:
+          - openshift-storage
+    - openshift-pipelines
+    - redhat-ods-applications
+    - rhoai-model-registries
+    - rhods-notebooks
+
+  subscriptions:
+    nfd:
+      name: nfd
+      namespace: openshift-nfd
+    nvidia:
+      name: gpu-operator-certified
+      namespace: nvidia-gpu-operator
+      source: certified-operators
+    serverless:
+      name: serverless-operator
+      namespace: openshift-serverless
+    servicemesh:
+      name: servicemeshoperator
+      namespace: openshift-operators
+    rhoai:
+      name: rhods-operator
+      namespace: redhat-ods-operator
+    lvms:
+      name: lvms-operator
+      namespace: openshift-storage
+
+  applications:
+    nfd:
+      name: nfd
+      namespace: openshift-nfd
+      path: charts/nfd
+
+    nvidia-config:
+      name: nvidia-config
+      namespace: nvidia-gpu-operator
+      path: charts/nvidia-config
+
+    lvms:
+      name: lvms
+      namespace: openshift-storage
+      path: charts/lvms
+
+    dsc:
+      name: dsc
+      namespace: rag-llm-sno
+      path: charts/dsc
+
+    granite-inference-service:
+      name: granite-inference-service
+      namespace: rag-llm-sno
+      path: charts/vllm-inference-service
+      extraValueFiles:
+        - $patternref/overrides/granite-inference-service-values.yaml
+
+    gpt-oss-inference-service:
+      name: gpt-oss-inference-service
+      namespace: rag-llm-sno
+      path: charts/vllm-inference-service
+      extraValueFiles:
+        - $patternref/overrides/gpt-oss-inference-service-values.yaml
+
+    vector-db:
+      name: vector-db
+      namespace: rag-llm-sno
+      chart: vector-db
+      chartVersion: 0.1.*
+      extraValueFiles:
+        - $patternref/overrides/vector-db-values.yaml
+
+    rag-llm-frontend:
+      name: rag-llm-frontend
+      namespace: rag-llm-sno
+      repoURL: https://github.com/validatedpatterns-sandbox/rag-llm-demo-ui
+      chartVersion: main
+      path: helm
+      extraValueFiles:
+        - $patternref/overrides/rag-llm-frontend-values.yaml

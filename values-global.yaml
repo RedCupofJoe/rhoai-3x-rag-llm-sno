@@ -1,0 +1,9 @@
+global:
+  pattern: rag-llm-sno
+  secretLoader:
+    disabled: true
+main:
+  clusterGroupName: prod
+  multiSourceConfig:
+    enabled: true
+    clusterGroupChartVersion: 0.9.*

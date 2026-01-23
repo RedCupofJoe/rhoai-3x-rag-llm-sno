@@ -1,0 +1,26 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    {{- toYaml .Values.vllmInferenceService.annotations | nindent 4 }}
+  name: {{ include "vllm-inference-service.fullname" . }}
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  predictor:
+    annotations:
+      {{- toYaml .Values.vllmInferenceService.predictor.annotations | nindent 6 }}
+    maxReplicas: {{ .Values.vllmInferenceService.predictor.replicas }}
+    minReplicas: {{ .Values.vllmInferenceService.predictor.replicas }}
+    model:
+      modelFormat:
+        name: vLLM
+      name: ''
+      resources:
+        {{- toYaml .Values.vllmInferenceService.predictor.resources | nindent 8 }}
+      runtime: {{ include "vllm-inference-service.fullname" . }}
+    restartPolicy: Always
+    tolerations:
+      {{- toYaml .Values.vllmInferenceService.tolerations | nindent 6 }}
+    affinity:
+      {{- toYaml .Values.vllmInferenceService.predictor.affinity | nindent 6 }}

@@ -1,0 +1,18 @@
+vllmInferenceService:
+  annotations:
+    openshift.io/display-name: gpt-oss-inference
+    serving.kserve.io/deploymentMode: RawDeployment
+    argocd.argoproj.io/sync-wave: "20"
+
+vllmServingRuntime:
+  annotations:
+    opendatahub.io/accelerator-name: nvidia-gpu
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+    openshift.io/display-name: gpt-oss-inference
+    argocd.argoproj.io/sync-wave: "20"
+
+  model: openai/gpt-oss-120b
+
+acceleratorProfile:
+  enabled: false

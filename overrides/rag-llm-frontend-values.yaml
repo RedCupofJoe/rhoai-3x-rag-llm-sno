@@ -1,0 +1,9 @@
+env:
+  - name: LOG_LEVEL
+    value: info
+  - name: HOST
+    value: 0.0.0.0
+  - name: LLM_URLS
+    value: '["http://granite-inference-service-vllm-inference-service-predictor/v1", "http://gpt-oss-inference-service-vllm-inference-service-predictor/v1"]'
+  - name: DB_PROVIDERS
+    value: '[{"type": "qdrant", "collection": "docs", "url": "http://qdrant-service:6333", "embedding_model": "sentence-transformers/all-mpnet-base-v2"}]'

@@ -1,0 +1,15 @@
+vllmInferenceService:
+  annotations:
+    openshift.io/display-name: granite-inference
+    serving.kserve.io/deploymentMode: RawDeployment
+    argocd.argoproj.io/sync-wave: "20"
+
+vllmServingRuntime:
+  annotations:
+    opendatahub.io/accelerator-name: nvidia-gpu
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+    openshift.io/display-name: granite-inference
+    argocd.argoproj.io/sync-wave: "20"
+
+  model: ibm-granite/granite-4.0-h-small

@@ -1,0 +1,42 @@
+apiVersion: serving.kserve.io/v1alpha1
+kind: ServingRuntime
+metadata:
+  annotations:
+    {{- toYaml .Values.vllmServingRuntime.annotations | nindent 4 }}
+  name: {{ include "vllm-inference-service.fullname" . }}
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  annotations:
+    prometheus.io/path: /metrics
+    prometheus.io/port: '8080'
+  containers:
+    - args:
+        - {{ .Values.vllmServingRuntime.model }}
+        - --port
+        - {{ .Values.vllmServingRuntime.port | quote }}
+      command:
+        {{- toYaml .Values.vllmServingRuntime.command | nindent 8 }}
+      image: "{{ .Values.vllmServingRuntime.image.repository }}:{{ .Values.vllmServingRuntime.image.tag }}"
+      name: kserve-container
+      ports:
+        - containerPort: {{ .Values.vllmServingRuntime.port }}
+          protocol: TCP
+      volumeMounts:
+        - mountPath: /.triton
+          name: triton
+        - mountPath: /.cache
+          name: cache
+        - mountPath: /.config
+          name: config
+  multiModel: false
+  supportedModelFormats:
+    - autoSelect: true
+      name: vLLM
+  volumes:
+    - name:  triton
+      emptyDir: {}
+    - name: cache
+      emptyDir: {}
+    - name: config
+      emptyDir: {}

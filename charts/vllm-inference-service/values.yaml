@@ -1,0 +1,52 @@
+global:
+  localClusterDomain: example.com
+
+vllmInferenceService:
+  annotations:
+    openshift.io/display-name: vllm-inference
+    serving.kserve.io/deploymentMode: RawDeployment
+    argocd.argoproj.io/sync-wave: "20"
+
+  predictor:
+    annotations:
+      serving.knative.dev/progress-deadline: 60m
+    replicas: 1
+    resources:
+      limits:
+        nvidia.com/gpu: '1'
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: nvidia.com/gpu.present
+                  operator: In
+                  values: ["true"]
+
+  tolerations:
+    - effect: NoSchedule
+      key: odh-notebook
+      operator: Exists
+
+vllmServingRuntime:
+  annotations:
+    opendatahub.io/accelerator-name: nvidia-gpu
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+    openshift.io/display-name: vllm-inference
+    argocd.argoproj.io/sync-wave: "20"
+
+  model: ibm-granite/granite-3.3-8b-instruct
+
+  command:
+    - vllm
+    - serve
+
+  image:
+    repository: vllm/vllm-openai
+    tag: latest-cu130
+
+  port: 8080
+
+acceleratorProfile:
+  enabled: true
