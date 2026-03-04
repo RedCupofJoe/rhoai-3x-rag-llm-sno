@@ -1,10 +1,12 @@
-# RAG LLM Pattern on a Single-Node OpenShift Cluster
+# RAG LLM Pattern on OpenShift AI 3.x Single Node Openshift
 
 ## Overview
 
-This Validated Pattern deploys a Retrieval-Augmented Generation (RAG) Large Language Model (LLM) infrastructure on a Single Node OpenShift (SNO) cluster. It provides a GPU-accelerated environment for running LLM inference services using vLLM with both IBM Granite 4 Small and GPT-OSS 120B models.
+This Validated Pattern deploys a Retrieval-Augmented Generation (RAG) Large Language Model (LLM) infrastructure on **Red Hat OpenShift AI 3.x**, suitable for a Single Node OpenShift (SNO) cluster. It provides a GPU-accelerated environment for running LLM inference services using vLLM with both IBM Granite 4 Small and GPT-OSS 120B models, and **exposes endpoints** for the deployed models.
 
 In addition to the LLM inference services, the pattern deploys Qdrant as a vector database, pre-populated with the Validated Patterns documentation. A frontend application is also included, allowing users to select an LLM, configure retrieval settings, and query the complete RAG pipeline.
+
+The repository is intended to be deployed on an **existing OpenShift cluster (4.20+) with OpenShift AI 3.0 installed**, or the pattern can install OpenShift AI 3.x via the `fast-3.x` channel as part of the deployment.
 
 ```mermaid
 flowchart LR
@@ -29,17 +31,19 @@ flowchart LR
 - [**RAG Frontend Application**](https://github.com/validatedpatterns-sandbox/rag-llm-demo-ui) - Web interface for selecting an LLM, configuring retrieval settings, and querying the RAG pipeline
 
 ### Supporting Operators
-- [**Red Hat OpenShift AI (RHOAI)**](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai) - AI/ML platform for model serving and management
-- [**NVIDIA GPU Operator**](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/introduction.html) - Provides GPU support for the inference services
-- [**Node Feature Discovery (NFD)**](https://github.com/openshift/cluster-nfd-operator) - Identifies node hardware capabilities
-- [**Local Volume Management Service (LVMS)**](https://github.com/openshift/lvm-operator) - Manages local storage volumes
+- [**Red Hat OpenShift AI 3.x**](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2) - AI/ML platform for model serving (KServe single-model serving). The pattern uses the **fast-3.x** channel when installing the operator.
+- [**cert-manager**](https://cert-manager.io/) - Required by OpenShift AI for the KServe model serving platform.
+- [**NVIDIA GPU Operator**](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/introduction.html) - Provides GPU support for the inference services.
+- [**Node Feature Discovery (NFD)**](https://github.com/openshift/cluster-nfd-operator) - Identifies node hardware capabilities.
+- [**Local Volume Management Service (LVMS)**](https://github.com/openshift/lvm-operator) - Manages local storage volumes.
 
 ## Prerequisites
 
-- [**OpenShift Cluster**](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/install-sno-installing-sno) - Single Node OpenShift (SNO) deployment
-- [**GPU Hardware**](https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-6000/) - NVIDIA GPU-enabled node with sufficient VRAM for LLM inference (at least 80GB to run the GPT-OSS 120B model)
+- [**OpenShift Cluster 4.20+**](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/install-sno-installing-sno) - Including Single Node OpenShift (SNO). OpenShift AI 3.x requires 4.19 or later.
+- **OpenShift AI 3.0** - Either already installed on the cluster, or the pattern will install it (subscription channel `fast-3.x`).
+- **SNO target:** [**Cisco UCS**](https://www.cisco.com/c/en/us/products/servers-unified-computing/index.html) server with 2x [**NVIDIA H100**](https://www.nvidia.com/en-us/data-center/h100/) GPUs and **500GB memory** for running both LLM inference services and the rest of the stack. At least 80GB GPU VRAM per GPU is recommended for the GPT-OSS 120B model.
 
-This pattern was developed and tested on a [Lenovo ThinkSystem SR650a V4](https://lenovopress.lenovo.com/datasheet/ds0195-lenovo-thinksystem-sr650a-v4) with 2 NVIDIA RTX Pro 6000 GPUs. If your hardware does not meet these requirements, you will need to modify this pattern accordingly.
+If your hardware differs (e.g., different GPU or memory), adjust resource limits and model selection in the pattern overrides accordingly.
 
 ## Installation
 
@@ -67,7 +71,7 @@ This pattern was developed and tested on a [Lenovo ThinkSystem SR650a V4](https:
 
 ### Custom Installation
 
-If your hardware differs from the tested configuration or you need to modify the pattern:
+If your hardware differs from the tested configuration (Cisco UCS with 2x H100, 500GB memory) or you need to modify the pattern:
 
 1. Fork this repository and clone your fork:
    ```bash
@@ -112,7 +116,11 @@ After installation, access the pattern components from the OpenShift console's a
 From here you can:
 - **Cluster Argo CD / Prod ArgoCD** - View the GitOps installation and sync status of the pattern
 - **RAG LLM Demo UI** - Launch the frontend application
-- **Red Hat OpenShift AI** - Access the RHOAI dashboard
+- **Red Hat OpenShift AI** - Access the OpenShift AI dashboard
+
+### Model and application endpoints
+
+After deployment, the pattern exposes **endpoints for the deployed models** (Granite 4 Small and GPT-OSS 120B) and the RAG frontend. For internal URLs, external Route URLs, and how to call the OpenAI-compatible inference API, see **[docs/ENDPOINTS.md](docs/ENDPOINTS.md)**.
 
 ### Using the Frontend
 

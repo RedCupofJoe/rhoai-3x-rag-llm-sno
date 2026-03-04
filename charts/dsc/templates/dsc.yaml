@@ -1,15 +1,20 @@
-apiVersion: datasciencecluster.opendatahub.io/v1
+# DataScienceCluster for Red Hat OpenShift AI 3.x (API v2)
+# Deploys KServe (single-model serving), dashboard, workbenches, and model registry.
+# Requires cert-manager Operator when using KServe. See README.
+apiVersion: datasciencecluster.opendatahub.io/v2
 kind: DataScienceCluster
 metadata:
   name: default-dsc
 spec:
   components:
-    codeflare:
+    aipipelines:
+      managementState: Removed
+    dashboard:
       managementState: Managed
+    feastoperator:
+      managementState: Removed
     kserve:
       managementState: Managed
-      defaultDeploymentMode: RawDeployment
-      rawDeploymentServiceConfig: Headed
       serving:
         ingressGateway:
           certificate:
@@ -17,17 +22,19 @@ spec:
             type: OpenshiftDefaultIngress
         managementState: Managed
         name: knative-serving
+    kueue:
+      managementState: Removed
+    llamastackoperator:
+      managementState: Removed
     modelregistry:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
+    ray:
+      managementState: Removed
+    trainingoperator:
+      managementState: Removed
+    trustyai:
+      managementState: Removed
     workbenches:
       managementState: Managed
       workbenchNamespace: rhods-notebooks
-    dashboard:
-      managementState: Managed
-    modelmeshserving:
-      managementState: Managed
-    llamastackoperator:
-      managementState: Managed
-    datasciencepipelines:
-      managementState: Managed

@@ -5,6 +5,7 @@ clusterGroup:
     - rag-llm-sno
     - openshift-nfd
     - nvidia-gpu-operator
+    - cert-manager
     - redhat-ods-operator:
         operatorGroup: true
         targetNamespaces: []
@@ -37,6 +38,11 @@ clusterGroup:
     rhoai:
       name: rhods-operator
       namespace: redhat-ods-operator
+      channel: fast-3.x  # OpenShift AI 3.x; use stable-3.x when available for production
+    certmanager:
+      name: cert-manager
+      namespace: cert-manager
+      source: redhat-operators
     lvms:
       name: lvms-operator
       namespace: openshift-storage
