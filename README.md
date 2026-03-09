@@ -1,5 +1,7 @@
 # RAG LLM Pattern on OpenShift AI 3.x Single Node Openshift
 
+**Repository:** [github.com/RedCupofJoe/rhoai-3x-rag-llm-sno](https://github.com/RedCupofJoe/rhoai-3x-rag-llm-sno)
+
 ## Overview
 
 This Validated Pattern deploys a Retrieval-Augmented Generation (RAG) Large Language Model (LLM) infrastructure on **Red Hat OpenShift AI 3.x**, suitable for a Single Node OpenShift (SNO) cluster. It provides a GPU-accelerated environment for running LLM inference services using vLLM with **IBM Granite 4 Small**, **GPT-OSS 120B**, and **Google Gemma 2** models, and **exposes endpoints** for the deployed models.
@@ -60,8 +62,8 @@ If your hardware differs (e.g., different GPU or memory), adjust resource limits
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/validatedpatterns-sandbox/rag-llm-sno.git
-   cd rag-llm-sno
+   git clone https://github.com/RedCupofJoe/rhoai-3x-rag-llm-sno.git
+   cd rhoai-3x-rag-llm-sno
    ```
 
 2. Log into your OpenShift cluster:
@@ -82,10 +84,10 @@ If your hardware differs (e.g., different GPU or memory), adjust resource limits
 
 If your hardware differs from the tested configuration (Cisco UCS with 2x H100, 500GB memory) or you need to modify the pattern:
 
-1. Fork this repository and clone your fork:
+1. Fork this repository and clone your fork (or clone this repo directly):
    ```bash
-   git clone https://github.com/<your-username>/rag-llm-sno.git
-   cd rag-llm-sno
+   git clone https://github.com/RedCupofJoe/rhoai-3x-rag-llm-sno.git
+   cd rhoai-3x-rag-llm-sno
    ```
 
 2. Create a branch for your changes:
