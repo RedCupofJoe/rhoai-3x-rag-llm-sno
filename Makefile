@@ -3,3 +3,11 @@
 # You can add custom targets above or below the include line
 
 include Makefile-common
+
+# Check that OpenShift AI 3.0 operators are present before installing the pattern
+.PHONY: check-openshift-ai-operators
+check-openshift-ai-operators: ## Verify OpenShift AI 3.0 (rhods-operator) is installed and Succeeded
+	@./scripts/check-openshift-ai-operators.sh
+
+# Run operator check before full pattern install
+install: check-openshift-ai-operators pattern-install

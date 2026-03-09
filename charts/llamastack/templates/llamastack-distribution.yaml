@@ -1,0 +1,47 @@
+# LlamaStackDistribution with inline Milvus Lite (no MILVUS_* env vars).
+# Data can be ingested via Jupyter/llama_stack_client or Docling; see OpenShift AI docs.
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: {{ include "llamastack.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "llamastack.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.llamastack.replicas }}
+  server:
+    name: llama-stack
+    port: {{ .Values.llamastack.server.port }}
+    distribution:
+      name: {{ .Values.llamastack.server.distribution }}
+    containerSpec:
+      resources:
+        requests:
+          cpu: {{ .Values.llamastack.server.resources.requests.cpu }}
+          memory: {{ .Values.llamastack.server.resources.requests.memory }}
+        limits:
+          cpu: {{ .Values.llamastack.server.resources.limits.cpu }}
+          memory: {{ .Values.llamastack.server.resources.limits.memory }}
+      env:
+        - name: INFERENCE_MODEL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: INFERENCE_MODEL
+        - name: VLLM_MAX_TOKENS
+          value: "4096"
+        - name: VLLM_URL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_URL
+        - name: VLLM_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_TLS_VERIFY
+        - name: VLLM_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-inference-model-secret
+              key: VLLM_API_TOKEN

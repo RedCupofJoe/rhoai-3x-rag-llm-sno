@@ -1,0 +1,22 @@
+# LlamaStack with inline Milvus Lite (embedded in the Llama Stack pod).
+# Inference is provided by an existing KServe InferenceService in this namespace.
+inference:
+  # Internal URL of the vLLM predictor (e.g. Granite inference service).
+  url: "http://granite-inference-service-vllm-inference-service-predictor:80/v1"
+  # Model identifier as expected by the inference API.
+  model: "ibm-granite/granite-4.0-h-small"
+  tlsVerify: "false"
+  apiToken: ""
+
+llamastack:
+  replicas: 1
+  server:
+    port: 8321
+    distribution: "rh-dev"
+    resources:
+      requests:
+        cpu: "250m"
+        memory: "500Mi"
+      limits:
+        cpu: "4"
+        memory: "12Gi"
