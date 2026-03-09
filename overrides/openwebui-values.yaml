@@ -1,0 +1,15 @@
+# Open WebUI wired to this pattern's inference services and LlamaStack (inline Milvus Lite) for RAG.
+# All models and RAG use the same Inline Milvus Lite vector store via LlamaStack.
+
+ollama:
+  enabled: false
+
+pipelines:
+  enabled: false
+
+# vLLM inference services plus LlamaStack (RAG over inline Milvus Lite). Semicolon-separated; no API keys for in-cluster.
+extraEnvVars:
+  - name: OPENAI_API_BASE_URLS
+    value: "http://granite-inference-service-vllm-inference-service-predictor:80/v1;http://gpt-oss-inference-service-vllm-inference-service-predictor:80/v1;http://gemma2-inference-service-vllm-inference-service-predictor:80/v1;http://llamastack-llamastack:8321/v1"
+  - name: BYPASS_MODEL_ACCESS_CONTROL
+    value: "true"

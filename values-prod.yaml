@@ -82,13 +82,17 @@ clusterGroup:
       extraValueFiles:
         - $patternref/overrides/gpt-oss-inference-service-values.yaml
 
-    vector-db:
-      name: vector-db
+    gemma2-inference-service:
+      name: gemma2-inference-service
       namespace: rag-llm-sno
-      chart: vector-db
-      chartVersion: 0.1.*
+      path: charts/vllm-inference-service
       extraValueFiles:
-        - $patternref/overrides/vector-db-values.yaml
+        - $patternref/overrides/gemma2-inference-service-values.yaml
+
+    llamastack:
+      name: llamastack
+      namespace: rag-llm-sno
+      path: charts/llamastack
 
     rag-llm-frontend:
       name: rag-llm-frontend
@@ -98,3 +102,12 @@ clusterGroup:
       path: helm
       extraValueFiles:
         - $patternref/overrides/rag-llm-frontend-values.yaml
+
+    openwebui:
+      name: openwebui
+      namespace: rag-llm-sno
+      repoURL: https://github.com/open-webui/helm-charts
+      chartVersion: main
+      path: charts/open-webui
+      extraValueFiles:
+        - $patternref/overrides/openwebui-values.yaml

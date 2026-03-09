@@ -1,9 +1,13 @@
+# RAG LLM Demo UI for administrators. Uses LlamaStack (inline Milvus Lite) for RAG and all inference services.
+# LlamaStack service name matches the LlamaStackDistribution resource name (llamastack-llamastack).
 env:
   - name: LOG_LEVEL
     value: info
   - name: HOST
     value: 0.0.0.0
+  # All three vLLM services plus LlamaStack (RAG over inline Milvus Lite); admins can choose LlamaStack for RAG.
   - name: LLM_URLS
-    value: '["http://granite-inference-service-vllm-inference-service-predictor/v1", "http://gpt-oss-inference-service-vllm-inference-service-predictor/v1"]'
+    value: '["http://granite-inference-service-vllm-inference-service-predictor/v1", "http://gpt-oss-inference-service-vllm-inference-service-predictor/v1", "http://gemma2-inference-service-vllm-inference-service-predictor/v1", "http://llamastack-llamastack:8321/v1"]'
+  # LlamaStack hosts inline Milvus Lite; use empty DB_PROVIDERS and select LlamaStack from LLM_URLS for RAG.
   - name: DB_PROVIDERS
-    value: '[{"type": "qdrant", "collection": "docs", "url": "http://qdrant-service:6333", "embedding_model": "sentence-transformers/all-mpnet-base-v2"}]'
+    value: '[]'
