@@ -75,10 +75,11 @@ If your hardware differs (e.g., different GPU or memory), adjust resource limits
    oc login --token=<your-token> --server=<your-cluster-api>
    ```
 
-3. Install the pattern (this will first verify that the OpenShift AI 3.0 operators are present; see `make check-openshift-ai-operators` to run the check only):
+3. Install the pattern. This will **first ensure Argo CD (OpenShift GitOps Operator) is installed** (and install it if missing), then verify OpenShift AI 3.0 operators, then deploy the pattern:
    ```bash
    ./pattern.sh make install
    ```
+   To run only the Argo CD check/install: `./pattern.sh make check-argocd`. To run only the OpenShift AI check: `./pattern.sh make check-openshift-ai-operators`.
 
 ### Custom Installation
 

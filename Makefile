@@ -4,10 +4,15 @@
 
 include Makefile-common
 
+# Check that Argo CD (OpenShift GitOps) is present; install if missing (must run before pattern install)
+.PHONY: check-argocd
+check-argocd: ## Verify Argo CD (GitOps Operator) is installed; install it if not present
+	@./scripts/check-or-install-argocd.sh
+
 # Check that OpenShift AI 3.0 operators are present before installing the pattern
 .PHONY: check-openshift-ai-operators
 check-openshift-ai-operators: ## Verify OpenShift AI 3.0 (rhods-operator) is installed and Succeeded
 	@./scripts/check-openshift-ai-operators.sh
 
-# Run operator check before full pattern install
-install: check-openshift-ai-operators pattern-install
+# Run Argo CD check/install first, then OpenShift AI check, then full pattern install
+install: check-argocd check-openshift-ai-operators pattern-install
