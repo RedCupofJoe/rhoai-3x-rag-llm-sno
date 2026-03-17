@@ -1,0 +1,7 @@
+# For compiling the pipeline (run locally or in a workbench)
+kfp>=2.6.0
+
+# Dependencies for the pipeline container (install in Dockerfile or use base image that has these)
+# docling
+# llama_stack_client>=0.3.1
+# gitpython

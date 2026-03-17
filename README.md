@@ -138,4 +138,4 @@ After deployment, the pattern exposes **endpoints for the deployed models** (Gra
 ### Using the frontends
 
 - **RAG LLM Demo UI (administrators)** – Use the route for `rag-llm-frontend` in `rag-llm-sno`. Select an LLM: Granite, GPT-OSS, Gemma 2, or **LlamaStack** for RAG over the shared **inline Milvus Lite** vector store.
-- **Open WebUI (users)** – Use the route or port-forward for `openwebui` in `rag-llm-sno`. Chat with Granite, GPT-OSS, Gemma 2, or select **LlamaStack** for RAG over the same **inline Milvus Lite** store. Ingest documents into Milvus Lite via Jupyter/`llama_stack_client` or Docling; see the [Llama Stack documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.0/html/working_with_llama_stack/deploying-a-rag-stack-in-a-project_rag).
+- **Open WebUI (users)** – Use the route or port-forward for `openwebui` in `rag-llm-sno`. Chat with Granite, GPT-OSS, Gemma 2, or select **LlamaStack** for RAG over the same **inline Milvus Lite** store. To add **PDFs** (or other docs) to the RAG database, see **[docs/RAG-PDF-INGESTION.md](docs/RAG-PDF-INGESTION.md)**; you can use a Jupyter workbench or a Docling pipeline.
