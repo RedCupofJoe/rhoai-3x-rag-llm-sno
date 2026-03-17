@@ -25,6 +25,7 @@ clusterGroup:
     nfd:
       name: nfd
       namespace: openshift-nfd
+    # Red Hat Certified Operator only; do not use community-operators (gpu-operator)
     nvidia:
       name: gpu-operator-certified
       namespace: nvidia-gpu-operator
