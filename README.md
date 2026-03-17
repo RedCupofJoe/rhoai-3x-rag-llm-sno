@@ -4,7 +4,7 @@
 
 ## Overview
 
-This Validated Pattern deploys a Retrieval-Augmented Generation (RAG) Large Language Model (LLM) infrastructure on **Red Hat OpenShift AI 3.x**, suitable for a Single Node OpenShift (SNO) cluster. It provides a GPU-accelerated environment for running LLM inference services using vLLM with **IBM Granite 4 Small**, **GPT-OSS 120B**, and **Google Gemma 2** models, and **exposes endpoints** for the deployed models.
+This Validated Pattern deploys a Retrieval-Augmented Generation (RAG) Large Language Model (LLM) infrastructure on **Red Hat OpenShift AI 3.x**, suitable for a Single Node OpenShift (SNO) cluster. It provides a GPU-accelerated environment for running LLM inference services using vLLM with **IBM Granite 4 Small**, **GPT-OSS 20B** (default when &lt; 80GB VRAM), **GPT-OSS 120B** (when ≥ 80GB VRAM), and **Google Gemma 2** models, and **exposes endpoints** for the deployed models.
 
 The pattern provides **two frontends**—**RAG LLM Demo UI** (administrators) and **Open WebUI** (users)—both using the **inline Milvus Lite** vector database via the OpenShift AI Llama Stack. A single LlamaStackDistribution hosts Milvus Lite; both UIs call the Llama Stack API for RAG.
 
@@ -31,15 +31,16 @@ flowchart LR
 
 ### LLM Inference Services
 - [**IBM Granite 4 Small**](https://huggingface.co/ibm-granite/granite-4.0-h-small) - Served via vLLM with GPU acceleration
-- [**GPT-OSS 120B**](https://huggingface.co/openai/gpt-oss-120b) - **Optional.** Served via vLLM; schedules only on nodes with **H100 or higher** (node affinity on `nvidia.com/gpu.product`). If no such GPU exists, the predictor stays Pending and other models are unaffected.
+- [**GPT-OSS 20B**](https://huggingface.co/openai/gpt-oss-20b) - **Default when &lt; 80GB VRAM.** Served via vLLM; schedules on any node with an NVIDIA GPU. Use this on clusters without 80GB+ VRAM per node.
+- [**GPT-OSS 120B**](https://huggingface.co/openai/gpt-oss-120b) - **Optional.** Served via vLLM; schedules only on nodes with **≥ 80GB VRAM** (e.g. H100 80GB, H200 141GB; node affinity on `nvidia.com/gpu.product`). If no such GPU exists, the 120B predictor stays Pending; OSS-20B remains available.
 - [**Google Gemma 2**](https://huggingface.co/google/gemma-2-2b) - Served via vLLM with GPU acceleration
 
 ### Vector store and RAG
 - **Inline Milvus Lite** (OpenShift AI Llama Stack) - Single vector database for **both** administrators and users. It runs embedded in the LlamaStackDistribution pod. **Both frontends** use the Llama Stack API for RAG (which uses inline Milvus Lite). Ingest content via Jupyter/`llama_stack_client` or Docling; see [OpenShift AI Llama Stack docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.0/html/working_with_llama_stack/deploying-a-rag-stack-in-a-project_rag).
 
 ### Frontends
-- [**RAG LLM Demo UI**](https://github.com/validatedpatterns-sandbox/rag-llm-demo-ui) - **Administrator** interface: RAG via LlamaStack (inline Milvus Lite), plus direct access to Granite, GPT-OSS, and Gemma 2.
-- [**Open WebUI**](https://github.com/open-webui/open-webui) - **User** interface: chat and RAG via the same LlamaStack (inline Milvus Lite) and the three inference services (Granite, GPT-OSS, Gemma 2).
+- [**RAG LLM Demo UI**](https://github.com/validatedpatterns-sandbox/rag-llm-demo-ui) - **Administrator** interface: RAG via LlamaStack (inline Milvus Lite), plus direct access to Granite, GPT-OSS 20B/120B, and Gemma 2.
+- [**Open WebUI**](https://github.com/open-webui/open-webui) - **User** interface: chat and RAG via the same LlamaStack (inline Milvus Lite) and the inference services (Granite, OSS-20B by default, OSS-120B when ≥ 80GB VRAM, Gemma 2).
 
 ### Supporting Operators
 - [**Red Hat OpenShift AI 3.x**](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2) - AI/ML platform for model serving (KServe single-model serving). The pattern uses the **fast-3.x** channel when installing the operator.
@@ -52,9 +53,9 @@ flowchart LR
 
 - [**OpenShift Cluster 4.20+**](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/install-sno-installing-sno) - Including Single Node OpenShift (SNO). OpenShift AI 3.x requires 4.19 or later.
 - **OpenShift AI 3.0** - Either already installed on the cluster, or the pattern will install it (subscription channel `fast-3.x`).
-- **SNO target:** [**Cisco UCS**](https://www.cisco.com/c/en/us/products/servers-unified-computing/index.html) server with 2x [**NVIDIA H100**](https://www.nvidia.com/en-us/data-center/h100/) GPUs and **500GB memory** for running all inference services. GPT-OSS 120B is **optional** and only runs when at least one node has an H100 or higher (e.g. H200); clusters without H100+ will run Granite and Gemma 2 only, with the GPT-OSS predictor remaining Pending.
+- **SNO target:** [**Cisco UCS**](https://www.cisco.com/c/en/us/products/servers-unified-computing/index.html) server with 2x [**NVIDIA H100**](https://www.nvidia.com/en-us/data-center/h100/) GPUs and **500GB memory** for running all inference services. The pattern **defaults to GPT-OSS 20B** when no node has ≥ 80GB VRAM; **GPT-OSS 120B** runs when at least one node has ≥ 80GB VRAM (e.g. H100 80GB, H200 141GB).
 
-If your hardware differs (e.g., different GPU or memory), adjust resource limits and model selection in the pattern overrides accordingly. To add more GPU products (e.g. future NVIDIA datacenter GPUs) for GPT-OSS scheduling, edit the `nvidia.com/gpu.product` values in `overrides/gpt-oss-inference-service-values.yaml`.
+If your hardware differs (e.g., different GPU or memory), adjust resource limits and model selection in the pattern overrides accordingly. To add more GPU products for the 120B service (≥ 80GB VRAM), edit `nvidia.com/gpu.product` in `overrides/gpt-oss-inference-service-values.yaml`.
 
 ## Installation
 
@@ -133,9 +134,9 @@ From here you can:
 
 ### Model and application endpoints
 
-After deployment, the pattern exposes **endpoints for the deployed models** (Granite 4 Small, GPT-OSS 120B, and Gemma 2), **both frontends**, and **LlamaStack** (inline Milvus Lite) for RAG. For internal URLs, external Route URLs, and how to call the OpenAI-compatible inference API, see **[docs/ENDPOINTS.md](docs/ENDPOINTS.md)**.
+After deployment, the pattern exposes **endpoints for the deployed models** (Granite 4 Small, **GPT-OSS 20B** by default, optionally GPT-OSS 120B when ≥ 80GB VRAM, and Gemma 2), **both frontends**, and **LlamaStack** (inline Milvus Lite) for RAG. For internal URLs, external Route URLs, and how to call the OpenAI-compatible inference API, see **[docs/ENDPOINTS.md](docs/ENDPOINTS.md)**.
 
 ### Using the frontends
 
-- **RAG LLM Demo UI (administrators)** – Use the route for `rag-llm-frontend` in `rag-llm-sno`. Select an LLM: Granite, GPT-OSS, Gemma 2, or **LlamaStack** for RAG over the shared **inline Milvus Lite** vector store.
-- **Open WebUI (users)** – Use the route or port-forward for `openwebui` in `rag-llm-sno`. Chat with Granite, GPT-OSS, Gemma 2, or select **LlamaStack** for RAG over the same **inline Milvus Lite** store. To add **PDFs** (or other docs) to the RAG database, see **[docs/RAG-PDF-INGESTION.md](docs/RAG-PDF-INGESTION.md)**; you can use a Jupyter workbench or a Docling pipeline.
+- **RAG LLM Demo UI (administrators)** – Use the route for `rag-llm-frontend` in `rag-llm-sno`. Select an LLM: Granite, GPT-OSS 20B (default), GPT-OSS 120B (if ≥ 80GB VRAM), Gemma 2, or **LlamaStack** for RAG over the shared **inline Milvus Lite** vector store.
+- **Open WebUI (users)** – Use the route or port-forward for `openwebui` in `rag-llm-sno`. Chat with Granite, GPT-OSS 20B, GPT-OSS 120B (when available), Gemma 2, or select **LlamaStack** for RAG. To add **PDFs** (or other docs) to the RAG database, see **[docs/RAG-PDF-INGESTION.md](docs/RAG-PDF-INGESTION.md)**; you can use a Jupyter workbench or a Docling pipeline.

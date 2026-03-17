@@ -1,8 +1,8 @@
-# GPT-OSS 120B is optional: it only schedules on nodes with H100 or higher (nvidia.com/gpu.product).
-# On clusters without such GPUs, the predictor stays Pending; other models (Granite, Gemma 2) are unaffected.
+# GPT-OSS 120B: only schedules when >= 80GB VRAM (nvidia.com/gpu.product).
+# Default for < 80GB VRAM is OSS-20B (gpt-oss-20b-inference-service).
 vllmInferenceService:
   annotations:
-    openshift.io/display-name: gpt-oss-inference
+    openshift.io/display-name: gpt-oss-120b-inference
     serving.kserve.io/deploymentMode: RawDeployment
     argocd.argoproj.io/sync-wave: "20"
 
@@ -15,17 +15,15 @@ vllmInferenceService:
                 - key: nvidia.com/gpu.present
                   operator: In
                   values: ["true"]
-                # H100 or higher (GFD sets nvidia.com/gpu.product from nvidia-smi)
+                # >= 80GB VRAM (e.g. H100 80GB, H200 141GB); add more products as needed
                 - key: nvidia.com/gpu.product
                   operator: In
                   values:
                     - NVIDIA-H100-80GB-HBM3
                     - NVIDIA-H100-80GB
-                    - NVIDIA-H100-40GB-HBM3
-                    - NVIDIA-H100-SXM5-80GB
-                    - NVIDIA-H100-SXM4-80GB
-                    - NVIDIA-H200-90GB-HBM3
+                    - NVIDIA-H100
                     - NVIDIA-H200-141GB-HBM3
+                    - NVIDIA-H200-141GB
                     - NVIDIA-H200
 
 vllmServingRuntime:
@@ -33,7 +31,7 @@ vllmServingRuntime:
     opendatahub.io/accelerator-name: nvidia-gpu
     opendatahub.io/apiProtocol: REST
     opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
-    openshift.io/display-name: gpt-oss-inference
+    openshift.io/display-name: gpt-oss-120b-inference
     argocd.argoproj.io/sync-wave: "20"
 
   model: openai/gpt-oss-120b

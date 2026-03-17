@@ -9,12 +9,13 @@ After deploying this pattern on OpenShift AI 3.x, you can use the following endp
 
 ## Model inference endpoints
 
-Up to three LLM inference services are deployed. **GPT-OSS 120B is optional:** it only schedules on nodes with an H100 or higher GPU (`nvidia.com/gpu.product`). On clusters without such GPUs, the GPT-OSS predictor stays Pending and is not available.
+Up to four LLM inference services are deployed. **GPT-OSS 20B** is the default when &lt; 80GB VRAM (schedules on any NVIDIA GPU). **GPT-OSS 120B** only schedules on nodes with **≥ 80GB VRAM** (e.g. H100 80GB, H200 141GB; `nvidia.com/gpu.product`).
 
 | Model | Internal service (from within the cluster) | Purpose |
 |-------|-------------------------------------------|---------|
 | **IBM Granite 4 Small** | `http://granite-inference-service-vllm-inference-service-predictor.rag-llm-sno.svc.cluster.local/v1` | OpenAI-compatible API for Granite |
-| **GPT-OSS 120B** (optional, H100+ only) | `http://gpt-oss-inference-service-vllm-inference-service-predictor.rag-llm-sno.svc.cluster.local/v1` | OpenAI-compatible API for GPT-OSS; available only when a node has H100 or higher |
+| **GPT-OSS 20B** (default when &lt; 80GB VRAM) | `http://gpt-oss-20b-inference-service-vllm-inference-service-predictor.rag-llm-sno.svc.cluster.local/v1` | OpenAI-compatible API; runs on any node with an NVIDIA GPU |
+| **GPT-OSS 120B** (optional, ≥ 80GB VRAM) | `http://gpt-oss-inference-service-vllm-inference-service-predictor.rag-llm-sno.svc.cluster.local/v1` | OpenAI-compatible API; available only when a node has ≥ 80GB VRAM (e.g. H100 80GB, H200 141GB) |
 | **Google Gemma 2** | `http://gemma2-inference-service-vllm-inference-service-predictor.rag-llm-sno.svc.cluster.local/v1` | OpenAI-compatible API for Gemma 2 |
 
 ### Getting the external (Route) URLs
@@ -30,6 +31,7 @@ For access from outside the cluster (e.g., from your laptop or another service),
    ```bash
    oc get inferenceservice -n rag-llm-sno -o wide
    oc get inferenceservice granite-inference-service-vllm-inference-service -n rag-llm-sno -o jsonpath='{.status.url}'
+   oc get inferenceservice gpt-oss-20b-inference-service-vllm-inference-service -n rag-llm-sno -o jsonpath='{.status.url}'
    oc get inferenceservice gpt-oss-inference-service-vllm-inference-service -n rag-llm-sno -o jsonpath='{.status.url}'
    oc get inferenceservice gemma2-inference-service-vllm-inference-service -n rag-llm-sno -o jsonpath='{.status.url}'
    ```
@@ -40,7 +42,8 @@ For access from outside the cluster (e.g., from your laptop or another service),
    ```
    Then call the model with the route host, for example:
    - `https://<granite-route-host>/v1/chat/completions`
-   - `https://<gpt-oss-route-host>/v1/chat/completions`
+   - `https://<gpt-oss-20b-route-host>/v1/chat/completions`
+   - `https://<gpt-oss-120b-route-host>/v1/chat/completions` (if ≥ 80GB VRAM)
    - `https://<gemma2-route-host>/v1/chat/completions`
 
 ### OpenAI-compatible API
@@ -90,7 +93,7 @@ The pattern deploys a **LlamaStackDistribution** with **inline Milvus Lite** as 
 
 ## Summary
 
-- **Models:** Use the InferenceService predictor services internally, or the KServe/OpenShift routes for external access. All three models (Granite 4 Small, GPT-OSS 120B, Gemma 2) expose `/v1` and `/v1/chat/completions`.
-- **RAG LLM Demo UI (admins):** Use the Route for `rag-llm-frontend` in `rag-llm-sno`; it uses **inline Milvus Lite** via LlamaStack for RAG and can use all three LLMs or LlamaStack.
-- **Open WebUI (users):** Use the Route or port-forward for `openwebui` in `rag-llm-sno`; it uses the same **inline Milvus Lite** via LlamaStack for RAG and the three LLMs.
+- **Models:** Use the InferenceService predictor services internally, or the KServe/OpenShift routes for external access. Granite 4 Small, **GPT-OSS 20B** (default when &lt; 80GB VRAM), **GPT-OSS 120B** (when ≥ 80GB VRAM), and Gemma 2 expose `/v1` and `/v1/chat/completions`.
+- **RAG LLM Demo UI (admins):** Use the Route for `rag-llm-frontend` in `rag-llm-sno`; it uses **inline Milvus Lite** via LlamaStack for RAG and can use all deployed LLMs or LlamaStack.
+- **Open WebUI (users):** Use the Route or port-forward for `openwebui` in `rag-llm-sno`; it uses the same **inline Milvus Lite** via LlamaStack for RAG and the deployed LLMs (including OSS-20B by default).
 - **Vector database:** A single **inline Milvus Lite** instance in LlamaStack serves both UIs; ingest via Jupyter/`llama_stack_client` or Docling and use the Llama Stack API (`http://llamastack-llamastack:8321/v1`) for RAG.
