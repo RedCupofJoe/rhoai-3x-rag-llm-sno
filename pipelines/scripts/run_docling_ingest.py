@@ -64,6 +64,13 @@ def main() -> int:
         print(f"Created vector store: {vector_store_id}")
 
     converter = docling.document_converter.DocumentConverter()
+    # Exclude letterhead/headers/footers (Docling marks them as FURNITURE); export only BODY.
+    try:
+        from docling_core.types.doc.document import ContentLayer
+        export_options = {"included_content_layers": {ContentLayer.BODY}}
+    except (ImportError, AttributeError):
+        export_options = {}  # older Docling: no layer filter, export full document
+
     items = []
     supported = {".pdf", ".md", ".txt"}
     for fpath in sorted(rag_docs.rglob("*")):
@@ -75,7 +82,7 @@ def main() -> int:
         doc_id = str(rel).replace(os.sep, "_").replace(" ", "_")
         if fpath.suffix.lower() == ".pdf":
             result = converter.convert(str(fpath))
-            text = result.document.export_to_markdown()
+            text = result.document.export_to_markdown(**export_options)
         else:
             text = fpath.read_text(encoding="utf-8", errors="replace")
         items.append({

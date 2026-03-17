@@ -75,6 +75,13 @@ clusterGroup:
       extraValueFiles:
         - $patternref/overrides/granite-inference-service-values.yaml
 
+    gpt-oss-20b-inference-service:
+      name: gpt-oss-20b-inference-service
+      namespace: rag-llm-sno
+      path: charts/vllm-inference-service
+      extraValueFiles:
+        - $patternref/overrides/gpt-oss-20b-inference-service-values.yaml
+
     gpt-oss-inference-service:
       name: gpt-oss-inference-service
       namespace: rag-llm-sno

@@ -1,0 +1,20 @@
+# GPT-OSS 20B: default when < 80GB VRAM. Schedules on any node with an NVIDIA GPU.
+# Use this on clusters without 80GB+ VRAM; 120B runs only on nodes with >= 80GB VRAM (e.g. H100, H200).
+vllmInferenceService:
+  annotations:
+    openshift.io/display-name: gpt-oss-20b-inference
+    serving.kserve.io/deploymentMode: RawDeployment
+    argocd.argoproj.io/sync-wave: "20"
+
+vllmServingRuntime:
+  annotations:
+    opendatahub.io/accelerator-name: nvidia-gpu
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/recommended-accelerators: '["nvidia.com/gpu"]'
+    openshift.io/display-name: gpt-oss-20b-inference
+    argocd.argoproj.io/sync-wave: "20"
+
+  model: openai/gpt-oss-20b
+
+acceleratorProfile:
+  enabled: false

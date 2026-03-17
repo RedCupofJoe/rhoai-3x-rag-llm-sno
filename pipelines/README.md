@@ -11,7 +11,7 @@ This pipeline is **compliant with OpenShift AI 3.x** Data Science Pipelines. It 
 ## What the pipeline does
 
 1. **Clone this repo** (or use a workspace that already contains `rag-docs/`).
-2. **Process `rag-docs/`** – Convert PDFs to text with Docling; include `.md` and `.txt` as-is.
+2. **Process `rag-docs/`** – Convert PDFs to text with Docling; include `.md` and `.txt` as-is. **Letterhead, headers, and footers are excluded** from chunking: the script exports only body content (`ContentLayer.BODY`), so Docling’s furniture layer (headers/footers) is omitted. Requires Docling/docling_core versions that support `included_content_layers`.
 3. **Ingest into Llama Stack** – Send chunks to the Llama Stack vector store (inline Milvus Lite) used by the RAG UIs.
 
 ## Prerequisites
