@@ -1,0 +1,3 @@
+# PDFs in RAG source folder (ingest via pipeline; avoid committing large binaries)
+rag-docs/*.pdf
+rag-docs/**/*.pdf
