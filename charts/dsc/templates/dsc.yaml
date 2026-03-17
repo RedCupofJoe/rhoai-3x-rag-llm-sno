@@ -1,6 +1,6 @@
 # DataScienceCluster for Red Hat OpenShift AI 3.x (API v2)
 # Deploys KServe (single-model serving), dashboard, workbenches, and model registry.
-# Requires cert-manager Operator when using KServe. See README.
+# Requires cert-manager Operator for Red Hat OpenShift when using KServe. See README.
 apiVersion: datasciencecluster.opendatahub.io/v2
 kind: DataScienceCluster
 metadata:

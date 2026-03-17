@@ -5,7 +5,7 @@ clusterGroup:
     - rag-llm-sno
     - openshift-nfd
     - nvidia-gpu-operator
-    - cert-manager
+    - cert-manager-operator  # cert-manager Operator for Red Hat OpenShift
     - redhat-ods-operator:
         operatorGroup: true
         targetNamespaces: []
@@ -40,9 +40,10 @@ clusterGroup:
       namespace: redhat-ods-operator
       channel: fast-3.x  # OpenShift AI 3.x; use stable-3.x when available for production
     certmanager:
-      name: cert-manager
-      namespace: cert-manager
+      name: openshift-cert-manager-operator
+      namespace: cert-manager-operator
       source: redhat-operators
+      channel: stable-v1
     lvms:
       name: lvms-operator
       namespace: openshift-storage
