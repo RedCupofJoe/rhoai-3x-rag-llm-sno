@@ -86,7 +86,7 @@ The pattern deploys a **LlamaStackDistribution** with **inline Milvus Lite** as 
 
 - **LlamaStack service** – In the `rag-llm-sno` namespace, the Llama Stack server runs in the pod created by the LlamaStackDistribution. The Kubernetes Service has the same name as the LlamaStackDistribution resource (e.g. `llamastack-llamastack`). The server listens on port **8321** and is backed by inline Milvus Lite.
 - **Both frontends** – The RAG LLM Demo UI and Open WebUI are configured with `http://llamastack-llamastack:8321/v1` so that admins and users both use this vector store for RAG when they select the LlamaStack endpoint.
-- **Ingesting content** – Ingest documents into the vector store from a Jupyter workbench using the `llama_stack_client` SDK or via Docling in an AI pipeline. See [Deploying a RAG stack in a project](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.0/html/working_with_llama_stack/deploying-a-rag-stack-in-a-project_rag) and [Ingesting content into a Llama model](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.0/html/working_with_llama_stack/deploying-a-rag-stack-in-a-project_rag#ingesting-content-into-a-llama-model_rag).
+- **Ingesting content** – Ingest documents (including **PDFs**) from a Jupyter workbench using the `llama_stack_client` SDK or via a Docling pipeline. See **[docs/RAG-PDF-INGESTION.md](RAG-PDF-INGESTION.md)** for step-by-step PDF ingestion, and the [OpenShift AI Llama Stack docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.0/html/working_with_llama_stack/deploying-a-rag-stack-in-a-project_rag#ingesting-content-into-a-llama-model_rag) for the full SDK reference.
 
 ## Summary
 
