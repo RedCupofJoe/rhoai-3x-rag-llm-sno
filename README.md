@@ -44,7 +44,7 @@ flowchart LR
 
 ### Supporting Operators
 - [**Red Hat OpenShift AI 3.x**](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2) - AI/ML platform for model serving (KServe single-model serving). The pattern uses the **fast-3.x** channel when installing the operator.
-- [**cert-manager**](https://cert-manager.io/) - Required by OpenShift AI for the KServe model serving platform.
+- [**cert-manager Operator for Red Hat OpenShift**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/security_and_compliance/cert-manager-operator-for-red-hat-openshift) - Required by OpenShift AI for the KServe model serving platform. Use the Red Hat operator (`openshift-cert-manager-operator`) from `redhat-operators`, not the community cert-manager.
 - [**NVIDIA GPU Operator**](https://docs.nvidia.com/datacenter/cloud-native/openshift/latest/introduction.html) - Provides GPU support for the inference services.
 - [**Node Feature Discovery (NFD)**](https://github.com/openshift/cluster-nfd-operator) - Identifies node hardware capabilities.
 - [**Local Volume Management Service (LVMS)**](https://github.com/openshift/lvm-operator) - Manages local storage volumes.
