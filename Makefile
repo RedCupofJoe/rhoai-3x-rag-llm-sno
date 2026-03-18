@@ -14,5 +14,20 @@ check-argocd: ## Verify Argo CD (GitOps Operator) is installed; install it if no
 check-openshift-ai-operators: ## Verify OpenShift AI 3.0 (rhods-operator) is installed and Succeeded
 	@./scripts/check-openshift-ai-operators.sh
 
-# Run Argo CD check/install first, then OpenShift AI check, then full pattern install
-install: check-argocd check-openshift-ai-operators pattern-install
+# Block community cert-manager / duplicate RH cert-manager before GitOps applies operators
+.PHONY: check-cert-manager
+check-cert-manager: ## Cert-manager preflight (set CERTMANAGER_AVOID_SUBSCRIPTION_RECONCILE=1 to guard existing RH operator)
+	@./scripts/check-cert-manager-cluster.sh
+
+# Patch hub Argo Application so existing OLM Subscriptions are not overwritten from Git
+.PHONY: argocd-ignore-operator-subscriptions
+argocd-ignore-operator-subscriptions: ## Add ignoreDifferences for all operators.coreos.com/Subscription (see docs/ARGO-OPERATORS-NO-OVERWRITE.md)
+	@chmod +x ./scripts/argocd-ignore-existing-operator-subscriptions.sh 2>/dev/null; ./scripts/argocd-ignore-existing-operator-subscriptions.sh
+
+.PHONY: argocd-ignore-operator-subscriptions-optional
+argocd-ignore-operator-subscriptions-optional:
+	@chmod +x ./scripts/argocd-ignore-existing-operator-subscriptions.sh 2>/dev/null; ./scripts/argocd-ignore-existing-operator-subscriptions.sh || true
+
+# pattern-install must fail the target if deploy fails; Argo patch is best-effort (see docs if it warns)
+install: check-argocd check-cert-manager check-openshift-ai-operators argocd-ignore-operator-subscriptions-optional pattern-install
+	-@./scripts/argocd-ignore-existing-operator-subscriptions.sh || echo >&2 ">>> Run: make argocd-ignore-operator-subscriptions (set ARGOCD_APPLICATION_NAME if needed). See docs/ARGO-OPERATORS-NO-OVERWRITE.md"

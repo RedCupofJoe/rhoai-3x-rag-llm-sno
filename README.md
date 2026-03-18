@@ -80,11 +80,11 @@ Argo CD **sync waves** order operator installs, the Data Science Cluster, vLLM r
    oc login --token=<your-token> --server=<your-cluster-api>
    ```
 
-3. Install the pattern. This will **first ensure Argo CD (OpenShift GitOps Operator) is installed** (and install it if missing), then verify OpenShift AI 3.0 operators, then deploy the pattern:
+3. Install the pattern. This will **first ensure Argo CD (OpenShift GitOps Operator) is installed** (and install it if missing), run a **cert-manager preflight** (blocks community cert-manager and duplicate RH operators), verify OpenShift AI 3.0 operators, then deploy the pattern:
    ```bash
    ./pattern.sh make install
    ```
-   To run only the Argo CD check/install: `./pattern.sh make check-argocd`. To run only the OpenShift AI check: `./pattern.sh make check-openshift-ai-operators`.
+   To run only the Argo CD check/install: `./pattern.sh make check-argocd`. Cert-manager preflight: `./pattern.sh make check-cert-manager`. OpenShift AI check: `./pattern.sh make check-openshift-ai-operators`. **`make install` ends by patching the hub Argo CD Application** so **existing operator Subscriptions are not overwritten** from Git (licensed RHOCP-friendly). See **[docs/ARGO-OPERATORS-NO-OVERWRITE.md](docs/ARGO-OPERATORS-NO-OVERWRITE.md)**. Cert-manager / webhook issues: **[docs/CERT-MANAGER-PREFLIGHT.md](docs/CERT-MANAGER-PREFLIGHT.md)**.
 
 ### Custom Installation
 
