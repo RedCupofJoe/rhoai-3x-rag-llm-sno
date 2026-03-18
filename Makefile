@@ -9,10 +9,15 @@ include Makefile-common
 check-argocd: ## Verify Argo CD (GitOps Operator) is installed; install it if not present
 	@./scripts/check-or-install-argocd.sh
 
-# Check that OpenShift AI 3.0 operators are present before installing the pattern
+# OpenShift AI is created by this pattern via GitOps (values-prod subscriptions); run AFTER Argo has synced.
 .PHONY: check-openshift-ai-operators
-check-openshift-ai-operators: ## Verify OpenShift AI 3.0 (rhods-operator) is installed and Succeeded
+check-openshift-ai-operators: ## Verify OpenShift AI 3.x (rhods-operator) subscription exists and CSV is Succeeded
 	@./scripts/check-openshift-ai-operators.sh
+
+# Same as install but requires OpenShift AI already installed (e.g. manual install before GitOps)
+.PHONY: install-with-openshift-ai-precheck
+install-with-openshift-ai-precheck: check-argocd check-cert-manager check-openshift-ai-operators argocd-ignore-operator-subscriptions-optional pattern-install
+	-@./scripts/argocd-ignore-existing-operator-subscriptions.sh || echo >&2 ">>> Run: make argocd-ignore-operator-subscriptions"
 
 # Block community cert-manager / duplicate RH cert-manager before GitOps applies operators
 .PHONY: check-cert-manager
@@ -28,6 +33,13 @@ argocd-ignore-operator-subscriptions: ## Add ignoreDifferences for all operators
 argocd-ignore-operator-subscriptions-optional:
 	@chmod +x ./scripts/argocd-ignore-existing-operator-subscriptions.sh 2>/dev/null; ./scripts/argocd-ignore-existing-operator-subscriptions.sh || true
 
-# pattern-install must fail the target if deploy fails; Argo patch is best-effort (see docs if it warns)
-install: check-argocd check-cert-manager check-openshift-ai-operators argocd-ignore-operator-subscriptions-optional pattern-install
-	-@./scripts/argocd-ignore-existing-operator-subscriptions.sh || echo >&2 ">>> Run: make argocd-ignore-operator-subscriptions (set ARGOCD_APPLICATION_NAME if needed). See docs/ARGO-OPERATORS-NO-OVERWRITE.md"
+# ---------------------------------------------------------------------------
+# install — MUST stay last so it overrides Makefile-common's "install: pattern-install".
+# Do not add check-openshift-ai-operators here; rhods is created by GitOps after sync.
+# ---------------------------------------------------------------------------
+.PHONY: _rag_llm_sno_install
+_rag_llm_sno_install: check-argocd check-cert-manager argocd-ignore-operator-subscriptions-optional pattern-install
+	-@./scripts/argocd-ignore-existing-operator-subscriptions.sh || echo >&2 ">>> make argocd-ignore-operator-subscriptions (see docs/ARGO-OPERATORS-NO-OVERWRITE.md)"
+
+.PHONY: install
+install: _rag_llm_sno_install ## Installs pattern (Argo CD + cert preflight + pattern-install); verify rhoai after sync

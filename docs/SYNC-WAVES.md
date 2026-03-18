@@ -4,16 +4,15 @@ This pattern uses **`argocd.argoproj.io/sync-wave`** so OpenShift GitOps applies
 
 ## Operator subscriptions (`values-prod.yaml`)
 
-| Wave | Subscription | Purpose |
-|------|----------------|---------|
-| -45 | cert-manager Operator for Red Hat OpenShift | KServe / cert prerequisites |
-| -42 | Service Mesh, Serverless | Knative serving stack |
-| -38 | Node Feature Discovery | GPU / hardware labels |
-| -36 | NVIDIA GPU Operator (certified) | GPU drivers / runtime |
-| -34 | LVMS | Local storage |
-| -30 | OpenShift AI (`rhods-operator`) | DSC and serving APIs |
+**No per-subscription sync-waves** — all operator Subscriptions are applied in the **same** Argo sync phase so `rhods-operator` is not blocked if another operator (e.g. cert-manager) stays Progressing for a long time.
 
-Lower waves must become **healthy** before the next wave syncs (Argo CD behavior).
+| Subscription | Purpose |
+|----------------|---------|
+| OpenShift AI (`rhods-operator`) | DSC and serving APIs |
+| cert-manager Operator for Red Hat OpenShift | KServe / certs |
+| NFD, NVIDIA GPU (certified), LVMS | Hardware / GPU / storage |
+
+(Service Mesh + Serverless: install via Operator Hub **before** the pattern — not GitOps-managed here.)
 
 ## Argo Applications (`values-prod.yaml`)
 

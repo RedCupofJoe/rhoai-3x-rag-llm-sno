@@ -6,12 +6,13 @@ clusterGroup:
     - openshift-nfd
     - nvidia-gpu-operator
     - cert-manager-operator  # cert-manager Operator for Red Hat OpenShift
+    # Single OG here — do not duplicate (e.g. avoid bootstrap script also creating an OG in this ns).
     - redhat-ods-operator:
         operatorGroup: true
         targetNamespaces: []
-    - openshift-serverless:
-        operatorGroup: true
-        targetNamespaces: []
+    # Serverless/Service Mesh: install via Operator Hub BEFORE this pattern (see README) to avoid
+    # "intersecting operatorgroups provide the same apis" with OpenShift AI. Namespace only:
+    - openshift-serverless
     - openshift-storage:
         operatorGroup: true
         targetNamespaces:
@@ -21,49 +22,32 @@ clusterGroup:
     - rhoai-model-registries
     - rhods-notebooks
 
-  # Operator install order (Argo CD sync-wave on Subscription CRs). Lower = earlier.
-  # See docs/SYNC-WAVES.md
+  # Operator Subscriptions: no sync-waves here — staggered waves caused rhods-operator to never
+  # appear when an earlier operator (e.g. cert-manager) stayed Progressing. All apply in parallel.
+  # Application-level waves still order DSC after charts. See docs/SYNC-WAVES.md
   subscriptions:
+    rhoai:
+      name: rhods-operator
+      namespace: redhat-ods-operator
+      channel: fast-3.x  # OpenShift AI 3.x
     certmanager:
       name: openshift-cert-manager-operator
       namespace: cert-manager-operator
       source: redhat-operators
       channel: stable-v1
-      annotations:
-        argocd.argoproj.io/sync-wave: "-45"
-    servicemesh:
-      name: servicemeshoperator
-      namespace: openshift-operators
-      annotations:
-        argocd.argoproj.io/sync-wave: "-42"
-    serverless:
-      name: serverless-operator
-      namespace: openshift-serverless
-      annotations:
-        argocd.argoproj.io/sync-wave: "-42"
+    # servicemesh + serverless removed — install from Operator Hub first (RHOAI KServe prereq).
+    # See README "Prerequisites" and docs/OPERATORGROUP-INTERSECTING.md
     nfd:
       name: nfd
       namespace: openshift-nfd
-      annotations:
-        argocd.argoproj.io/sync-wave: "-38"
     # Red Hat Certified Operator only; do not use community-operators (gpu-operator)
     nvidia:
       name: gpu-operator-certified
       namespace: nvidia-gpu-operator
       source: certified-operators
-      annotations:
-        argocd.argoproj.io/sync-wave: "-36"
     lvms:
       name: lvms-operator
       namespace: openshift-storage
-      annotations:
-        argocd.argoproj.io/sync-wave: "-34"
-    rhoai:
-      name: rhods-operator
-      namespace: redhat-ods-operator
-      channel: fast-3.x  # OpenShift AI 3.x; use stable-3.x when available for production
-      annotations:
-        argocd.argoproj.io/sync-wave: "-30"
 
   # Argo CD Application sync order (coarse). Resource-level waves inside charts refine ordering.
   applications:

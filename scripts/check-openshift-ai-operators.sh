@@ -24,8 +24,10 @@ fi
 
 # Check that the OpenShift AI (RHODS) operator subscription exists
 if ! oc get subscription -n "$RHOAI_NAMESPACE" "$RHOAI_SUBSCRIPTION_NAME" &>/dev/null; then
-  err "OpenShift AI 3.0 operator subscription not found: subscription/$RHOAI_SUBSCRIPTION_NAME in namespace $RHOAI_NAMESPACE."
-  err "Install the operator first (e.g. via this pattern's operator-deploy or manually with channel fast-3.x)."
+  err "OpenShift AI operator subscription not found: $RHOAI_NAMESPACE/$RHOAI_SUBSCRIPTION_NAME."
+  err "If you just ran make install: wait for Argo CD to sync the pattern (openshift-gitops), then subscriptions appear."
+  err "Check: oc get applications.argoproj.io -n openshift-gitops && oc get subscription -n $RHOAI_NAMESPACE"
+  err "Or pre-install OpenShift AI, then use: make install-with-openshift-ai-precheck"
   exit 1
 fi
 
