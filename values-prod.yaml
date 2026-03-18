@@ -21,54 +21,79 @@ clusterGroup:
     - rhoai-model-registries
     - rhods-notebooks
 
+  # Operator install order (Argo CD sync-wave on Subscription CRs). Lower = earlier.
+  # See docs/SYNC-WAVES.md
   subscriptions:
-    nfd:
-      name: nfd
-      namespace: openshift-nfd
-    # Red Hat Certified Operator only; do not use community-operators (gpu-operator)
-    nvidia:
-      name: gpu-operator-certified
-      namespace: nvidia-gpu-operator
-      source: certified-operators
-    serverless:
-      name: serverless-operator
-      namespace: openshift-serverless
-    servicemesh:
-      name: servicemeshoperator
-      namespace: openshift-operators
-    rhoai:
-      name: rhods-operator
-      namespace: redhat-ods-operator
-      channel: fast-3.x  # OpenShift AI 3.x; use stable-3.x when available for production
     certmanager:
       name: openshift-cert-manager-operator
       namespace: cert-manager-operator
       source: redhat-operators
       channel: stable-v1
+      annotations:
+        argocd.argoproj.io/sync-wave: "-45"
+    servicemesh:
+      name: servicemeshoperator
+      namespace: openshift-operators
+      annotations:
+        argocd.argoproj.io/sync-wave: "-42"
+    serverless:
+      name: serverless-operator
+      namespace: openshift-serverless
+      annotations:
+        argocd.argoproj.io/sync-wave: "-42"
+    nfd:
+      name: nfd
+      namespace: openshift-nfd
+      annotations:
+        argocd.argoproj.io/sync-wave: "-38"
+    # Red Hat Certified Operator only; do not use community-operators (gpu-operator)
+    nvidia:
+      name: gpu-operator-certified
+      namespace: nvidia-gpu-operator
+      source: certified-operators
+      annotations:
+        argocd.argoproj.io/sync-wave: "-36"
     lvms:
       name: lvms-operator
       namespace: openshift-storage
+      annotations:
+        argocd.argoproj.io/sync-wave: "-34"
+    rhoai:
+      name: rhods-operator
+      namespace: redhat-ods-operator
+      channel: fast-3.x  # OpenShift AI 3.x; use stable-3.x when available for production
+      annotations:
+        argocd.argoproj.io/sync-wave: "-30"
 
+  # Argo CD Application sync order (coarse). Resource-level waves inside charts refine ordering.
   applications:
     nfd:
       name: nfd
       namespace: openshift-nfd
       path: charts/nfd
-
-    nvidia-config:
-      name: nvidia-config
-      namespace: nvidia-gpu-operator
-      path: charts/nvidia-config
+      annotations:
+        argocd.argoproj.io/sync-wave: "10"
 
     lvms:
       name: lvms
       namespace: openshift-storage
       path: charts/lvms
+      annotations:
+        argocd.argoproj.io/sync-wave: "15"
+
+    nvidia-config:
+      name: nvidia-config
+      namespace: nvidia-gpu-operator
+      path: charts/nvidia-config
+      annotations:
+        argocd.argoproj.io/sync-wave: "20"
 
     dsc:
       name: dsc
       namespace: rag-llm-sno
       path: charts/dsc
+      annotations:
+        argocd.argoproj.io/sync-wave: "30"
 
     granite-inference-service:
       name: granite-inference-service
@@ -76,20 +101,8 @@ clusterGroup:
       path: charts/vllm-inference-service
       extraValueFiles:
         - $patternref/overrides/granite-inference-service-values.yaml
-
-    gpt-oss-20b-inference-service:
-      name: gpt-oss-20b-inference-service
-      namespace: rag-llm-sno
-      path: charts/vllm-inference-service
-      extraValueFiles:
-        - $patternref/overrides/gpt-oss-20b-inference-service-values.yaml
-
-    gpt-oss-inference-service:
-      name: gpt-oss-inference-service
-      namespace: rag-llm-sno
-      path: charts/vllm-inference-service
-      extraValueFiles:
-        - $patternref/overrides/gpt-oss-inference-service-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "40"
 
     gemma2-inference-service:
       name: gemma2-inference-service
@@ -97,11 +110,33 @@ clusterGroup:
       path: charts/vllm-inference-service
       extraValueFiles:
         - $patternref/overrides/gemma2-inference-service-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "42"
+
+    gpt-oss-20b-inference-service:
+      name: gpt-oss-20b-inference-service
+      namespace: rag-llm-sno
+      path: charts/vllm-inference-service
+      extraValueFiles:
+        - $patternref/overrides/gpt-oss-20b-inference-service-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "44"
+
+    gpt-oss-inference-service:
+      name: gpt-oss-inference-service
+      namespace: rag-llm-sno
+      path: charts/vllm-inference-service
+      extraValueFiles:
+        - $patternref/overrides/gpt-oss-inference-service-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "46"
 
     llamastack:
       name: llamastack
       namespace: rag-llm-sno
       path: charts/llamastack
+      annotations:
+        argocd.argoproj.io/sync-wave: "50"
 
     rag-llm-frontend:
       name: rag-llm-frontend
@@ -111,6 +146,8 @@ clusterGroup:
       path: helm
       extraValueFiles:
         - $patternref/overrides/rag-llm-frontend-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "55"
 
     openwebui:
       name: openwebui
@@ -120,3 +157,5 @@ clusterGroup:
       path: charts/open-webui
       extraValueFiles:
         - $patternref/overrides/openwebui-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "56"

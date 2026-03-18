@@ -57,6 +57,10 @@ flowchart LR
 
 If your hardware differs (e.g., different GPU or memory), adjust resource limits and model selection in the pattern overrides accordingly. To add more GPU products for the 120B service (≥ 80GB VRAM), edit `nvidia.com/gpu.product` in `overrides/gpt-oss-inference-service-values.yaml`.
 
+## Deployment order (sync waves)
+
+Argo CD **sync waves** order operator installs, the Data Science Cluster, vLLM runtimes/services, LlamaStack, and UIs. See **[docs/SYNC-WAVES.md](docs/SYNC-WAVES.md)** for the full table.
+
 ## Installation
 
 ### Standard Installation
