@@ -1,5 +1,6 @@
 global:
   pattern: rag-llm-sno
+  # HashiCorp Vault is not used by this pattern (no External Secrets / vault-backend).
   secretLoader:
     disabled: true
 main:

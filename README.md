@@ -51,6 +51,7 @@ flowchart LR
 
 ## Prerequisites
 
+- **HashiCorp Vault is not required** — model pulls use public Hugging Face images by default; use OpenShift AI workbench secrets if you need private registry tokens.
 - [**OpenShift Cluster 4.20+**](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/install-sno-installing-sno) - Including Single Node OpenShift (SNO). OpenShift AI 3.x requires 4.19 or later.
 - **Before this pattern:** Install **[OpenShift Service Mesh](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/service_mesh/)** and **[OpenShift Serverless](https://docs.redhat.com/en/documentation/openshift_serverless/latest/html/installing_serverless/installing-openshift-serverless)** from **Operator Hub** (KServe / single-model serving depends on them). Doing this **outside** GitOps avoids OperatorGroup conflicts with OpenShift AI.
 - **OpenShift AI 3.x** - Installed by this pattern (`fast-3.x`) unless already present.
