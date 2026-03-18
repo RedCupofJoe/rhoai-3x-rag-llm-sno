@@ -1,5 +1,8 @@
 # Open WebUI wired to this pattern's inference services and LlamaStack (inline Milvus Lite) for RAG.
 # All models and RAG use the same Inline Milvus Lite vector store via LlamaStack.
+# Sync wave on workload (Argo orders resources within the openwebui Application after LlamaStack).
+annotations:
+  argocd.argoproj.io/sync-wave: "5"
 
 ollama:
   enabled: false

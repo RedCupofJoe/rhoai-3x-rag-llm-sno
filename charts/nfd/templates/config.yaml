@@ -2,6 +2,8 @@ apiVersion: nfd.openshift.io/v1
 kind: NodeFeatureDiscovery
 metadata:
   name: nfd-instance
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   operand:
     image: >-

@@ -3,6 +3,8 @@ kind: ClusterPolicy
 metadata:
   name: nvidia-gpu-cluster-policy
   namespace: nvidia-gpu-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   vgpuDeviceManager:
     enabled: true

@@ -5,6 +5,8 @@ apiVersion: datasciencecluster.opendatahub.io/v2
 kind: DataScienceCluster
 metadata:
   name: default-dsc
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   components:
     # Enable Data Science Pipelines (KFP 2.0) for the Docling RAG ingestion pipeline

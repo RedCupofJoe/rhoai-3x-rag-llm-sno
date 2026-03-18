@@ -4,6 +4,8 @@ apiVersion: llamastack.io/v1alpha1
 kind: LlamaStackDistribution
 metadata:
   name: {{ include "llamastack.fullname" . }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
   labels:
     app.kubernetes.io/name: {{ include "llamastack.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}
