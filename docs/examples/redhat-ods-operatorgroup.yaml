@@ -1,0 +1,8 @@
+# Use only if redhat-ods-operator has NO OperatorGroup and you are NOT letting GitOps create one.
+# Never apply if an OperatorGroup already exists in this namespace (duplicate OG breaks OLM).
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: redhat-ods-operator
+  namespace: redhat-ods-operator
+spec: {}

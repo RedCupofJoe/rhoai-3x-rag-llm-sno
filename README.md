@@ -8,7 +8,7 @@ This Validated Pattern deploys a Retrieval-Augmented Generation (RAG) Large Lang
 
 The pattern provides **two frontends**—**RAG LLM Demo UI** (administrators) and **Open WebUI** (users)—both using the **inline Milvus Lite** vector database via the OpenShift AI Llama Stack. A single LlamaStackDistribution hosts Milvus Lite; both UIs call the Llama Stack API for RAG.
 
-The repository is intended to be deployed on an **existing OpenShift cluster (4.20+) with OpenShift AI 3.0 installed**, or the pattern can install OpenShift AI 3.x via the `fast-3.x` channel as part of the deployment.
+The pattern installs **OpenShift AI** (`rhods-operator`) via GitOps. **OpenShift Service Mesh** and **OpenShift Serverless** must be installed **first** (Operator Hub), in Red Hat’s documented order—managing them in the same GitOps bundle as OpenShift AI often triggers **`intersecting operatorgroups provide the same apis`**. See **[docs/OPERATORGROUP-INTERSECTING.md](docs/OPERATORGROUP-INTERSECTING.md)**.
 
 ```mermaid
 flowchart LR
@@ -43,7 +43,7 @@ flowchart LR
 - [**Open WebUI**](https://github.com/open-webui/open-webui) - **User** interface: chat and RAG via the same LlamaStack (inline Milvus Lite) and the inference services (Granite, OSS-20B by default, OSS-120B when ≥ 80GB VRAM, Gemma 2).
 
 ### Supporting Operators
-- [**Red Hat OpenShift AI 3.x**](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2) - AI/ML platform for model serving (KServe single-model serving). The pattern uses the **fast-3.x** channel when installing the operator.
+- [**Red Hat OpenShift AI 3.x**](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2) - AI/ML platform for model serving (KServe). Installed by the pattern (**fast-3.x**). Requires Service Mesh + Serverless (see Prerequisites).
 - [**cert-manager Operator for Red Hat OpenShift**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/security_and_compliance/cert-manager-operator-for-red-hat-openshift) - Required by OpenShift AI for the KServe model serving platform. Use the Red Hat operator (`openshift-cert-manager-operator`) from `redhat-operators`, not the community cert-manager.
 - [**NVIDIA GPU Operator (Red Hat Certified)**](https://catalog.redhat.com/en/software/container-stacks/detail/5faa9cb6b72282d84b742c6e) - Provides GPU support for the inference services. The pattern uses the **Red Hat Certified Operator** (`gpu-operator-certified` from `certified-operators`), not the community operator.
 - [**Node Feature Discovery (NFD)**](https://github.com/openshift/cluster-nfd-operator) - Identifies node hardware capabilities.
@@ -52,7 +52,8 @@ flowchart LR
 ## Prerequisites
 
 - [**OpenShift Cluster 4.20+**](https://docs.redhat.com/en/documentation/openshift_container_platform/4.20/html/installing_on_a_single_node/install-sno-installing-sno) - Including Single Node OpenShift (SNO). OpenShift AI 3.x requires 4.19 or later.
-- **OpenShift AI 3.0** - Either already installed on the cluster, or the pattern will install it (subscription channel `fast-3.x`).
+- **Before this pattern:** Install **[OpenShift Service Mesh](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/service_mesh/)** and **[OpenShift Serverless](https://docs.redhat.com/en/documentation/openshift_serverless/latest/html/installing_serverless/installing-openshift-serverless)** from **Operator Hub** (KServe / single-model serving depends on them). Doing this **outside** GitOps avoids OperatorGroup conflicts with OpenShift AI.
+- **OpenShift AI 3.x** - Installed by this pattern (`fast-3.x`) unless already present.
 - **SNO target:** [**Cisco UCS**](https://www.cisco.com/c/en/us/products/servers-unified-computing/index.html) server with 2x [**NVIDIA H100**](https://www.nvidia.com/en-us/data-center/h100/) GPUs and **500GB memory** for running all inference services. The pattern **defaults to GPT-OSS 20B** when no node has ≥ 80GB VRAM; **GPT-OSS 120B** runs when at least one node has ≥ 80GB VRAM (e.g. H100 80GB, H200 141GB).
 
 If your hardware differs (e.g., different GPU or memory), adjust resource limits and model selection in the pattern overrides accordingly. To add more GPU products for the 120B service (≥ 80GB VRAM), edit `nvidia.com/gpu.product` in `overrides/gpt-oss-inference-service-values.yaml`.
@@ -80,11 +81,25 @@ Argo CD **sync waves** order operator installs, the Data Science Cluster, vLLM r
    oc login --token=<your-token> --server=<your-cluster-api>
    ```
 
-3. Install the pattern. This will **first ensure Argo CD (OpenShift GitOps Operator) is installed** (and install it if missing), run a **cert-manager preflight** (blocks community cert-manager and duplicate RH operators), verify OpenShift AI 3.0 operators, then deploy the pattern:
+3. **First time on this cluster only:** register the pattern with GitOps:
+   ```bash
+   ./pattern.sh make operator-deploy
+   ```
+   Skip this if you already see the pattern in Argo CD.
+
+4. Install / refresh: **Argo CD if needed**, cert-manager preflight, **pattern-install**. GitOps then applies **operator Subscriptions** (including **OpenShift AI `rhods-operator`**). You do **not** need OpenShift AI installed before this step.
    ```bash
    ./pattern.sh make install
    ```
-   To run only the Argo CD check/install: `./pattern.sh make check-argocd`. Cert-manager preflight: `./pattern.sh make check-cert-manager`. OpenShift AI check: `./pattern.sh make check-openshift-ai-operators`. **`make install` ends by patching the hub Argo CD Application** so **existing operator Subscriptions are not overwritten** from Git (licensed RHOCP-friendly). See **[docs/ARGO-OPERATORS-NO-OVERWRITE.md](docs/ARGO-OPERATORS-NO-OVERWRITE.md)**. Cert-manager / webhook issues: **[docs/CERT-MANAGER-PREFLIGHT.md](docs/CERT-MANAGER-PREFLIGHT.md)**.
+5. **After Argo syncs** (minutes), verify OpenShift AI is **Succeeded**:
+   ```bash
+   ./pattern.sh make check-openshift-ai-operators
+   ```
+   Or: `oc get csv -n redhat-ods-operator`. If **`oc get subscription -n redhat-ods-operator`** is still empty: refresh/sync the hub Application in Argo CD, **pull the latest repo** (subscription sync-waves were removed so rhods is not blocked), then re-run **`./pattern.sh make operator-deploy`** and **`./pattern.sh make install`**. **Emergency:** `./scripts/bootstrap-rhods-subscription.sh` (creates `rhods-operator` directly).
+
+   **If OpenShift AI is already installed** on the cluster before you run this pattern, you can use `./pattern.sh make install-with-openshift-ai-precheck` instead (same flow but requires `rhods-operator` up front).
+
+   Other targets: `./pattern.sh make check-argocd`, `check-cert-manager`. **`make install` ends** by patching the hub Application so operator Subscriptions are not overwritten from Git — see **[docs/ARGO-OPERATORS-NO-OVERWRITE.md](docs/ARGO-OPERATORS-NO-OVERWRITE.md)**. Cert-manager: **[docs/CERT-MANAGER-PREFLIGHT.md](docs/CERT-MANAGER-PREFLIGHT.md)**.
 
 ### Custom Installation
 
