@@ -1,0 +1,15 @@
+# prod-cloud: Semicolon-separated OpenAI-compatible bases (catalog predictors + LlamaStack).
+annotations:
+  argocd.argoproj.io/sync-wave: "5"
+
+ollama:
+  enabled: false
+
+pipelines:
+  enabled: false
+
+extraEnvVars:
+  - name: OPENAI_API_BASE_URLS
+    value: "http://REPLACE_CATALOG_MODEL_1-predictor.rag-llm-sno.svc.cluster.local:80/v1;http://llamastack-llamastack:8321/v1"
+  - name: BYPASS_MODEL_ACCESS_CONTROL
+    value: "true"
