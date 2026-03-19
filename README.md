@@ -46,7 +46,7 @@ flowchart LR
 - [**Red Hat OpenShift AI 3.x**](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.2) - AI/ML platform for model serving (KServe). Installed by the pattern (**fast-3.x**). Requires Service Mesh + Serverless (see Prerequisites).
 - [**cert-manager Operator for Red Hat OpenShift**](https://docs.redhat.com/en/documentation/openshift_container_platform/latest/html/security_and_compliance/cert-manager-operator-for-red-hat-openshift) - Required by OpenShift AI for the KServe model serving platform. Use the Red Hat operator (`openshift-cert-manager-operator`) from `redhat-operators`, not the community cert-manager.
 - [**NVIDIA GPU Operator (Red Hat Certified)**](https://catalog.redhat.com/en/software/container-stacks/detail/5faa9cb6b72282d84b742c6e) - Provides GPU support for the inference services. The pattern uses the **Red Hat Certified Operator** (`gpu-operator-certified` from `certified-operators`), not the community operator.
-- [**Node Feature Discovery (NFD)**](https://github.com/openshift/cluster-nfd-operator) - Identifies node hardware capabilities.
+- [**Node Feature Discovery (NFD)**](https://github.com/openshift/cluster-nfd-operator) - Identifies node hardware capabilities (**omitted** on the **`prod-cloud`** profile — see below).
 - [**Local Volume Management Service (LVMS)**](https://github.com/openshift/lvm-operator) - Manages local storage volumes.
 
 ## Prerequisites
@@ -59,9 +59,19 @@ flowchart LR
 
 If your hardware differs (e.g., different GPU or memory), adjust resource limits and model selection in the pattern overrides accordingly. To add more GPU products for the 120B service (≥ 80GB VRAM), edit `nvidia.com/gpu.product` in `overrides/gpt-oss-inference-service-values.yaml`.
 
+### Cloud GPU + OpenShift AI model catalog (`prod-cloud`)
+
+For **cloud MachineSet GPU nodes** (AWS/Azure/GCP) and serving models **from the OpenShift AI model catalog** (dashboard) instead of GitOps vLLM + Hugging Face:
+
+1. Set **`main.clusterGroupName: prod-cloud`** in **`values-global.yaml`**.
+2. Use **`values-prod-cloud.yaml`**, which **skips NFD** and the four GitOps InferenceService apps.
+3. After OpenShift AI is ready, **deploy models from the model catalog**, then edit **`overrides/*-cloud-catalog-values.yaml`** with your predictor URLs and commit.
+
+Full steps: **[docs/CLOUD-AND-MODEL-CATALOG.md](docs/CLOUD-AND-MODEL-CATALOG.md)**.
+
 ## Deployment order (sync waves)
 
-Argo CD **sync waves** order operator installs, the Data Science Cluster, vLLM runtimes/services, LlamaStack, and UIs. See **[docs/SYNC-WAVES.md](docs/SYNC-WAVES.md)** for the full table.
+Argo CD **sync waves** order operator installs, the Data Science Cluster, vLLM runtimes/services, LlamaStack, and UIs. See **[docs/SYNC-WAVES.md](docs/SYNC-WAVES.md)** for the full table (`prod` and **`prod-cloud`**).
 
 ## Installation
 

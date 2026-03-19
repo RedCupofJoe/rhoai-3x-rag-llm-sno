@@ -1,0 +1,9 @@
+# prod-cloud: LlamaStack talks to a model you deployed from the OpenShift AI model catalog.
+# After deploying, set predictor URL and model id to match your InferenceService.
+# Predictor host: oc get isvc -n rag-llm-sno -o jsonpath='{.items[0].status.url}' or
+#   http://<model-deployment-name>-predictor.<namespace>.svc.cluster.local:80/v1
+inference:
+  url: "http://REPLACE_CATALOG_MODEL_DEPLOYMENT_NAME-predictor.rag-llm-sno.svc.cluster.local:80/v1"
+  model: "REPLACE_WITH_MODEL_ID_FROM_DEPLOYMENT"
+  tlsVerify: "false"
+  apiToken: ""

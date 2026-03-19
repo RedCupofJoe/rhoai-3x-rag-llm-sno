@@ -1,0 +1,11 @@
+# prod-cloud: List every catalog-deployed predictor + LlamaStack. Replace REPLACE_* with your
+# InferenceService predictor Kubernetes service DNS names (in-cluster, port 80, path /v1).
+env:
+  - name: LOG_LEVEL
+    value: info
+  - name: HOST
+    value: 0.0.0.0
+  - name: LLM_URLS
+    value: '["http://REPLACE_CATALOG_MODEL_1-predictor.rag-llm-sno.svc.cluster.local/v1", "http://llamastack-llamastack:8321/v1"]'
+  - name: DB_PROVIDERS
+    value: '[]'
