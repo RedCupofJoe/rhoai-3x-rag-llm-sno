@@ -54,4 +54,17 @@ Serving runtimes are applied before inference services that reference them.
 - [Validated Patterns — sequencing subscriptions & applications](https://validatedpatterns.io/blog/2024-11-07-clustergroup-sequencing)
 - [Argo CD sync waves](https://argo-cd.readthedocs.io/en/stable/user-guide/sync-waves/)
 
+## Cluster group `prod-cloud` (`values-prod-cloud.yaml`)
+
+No NFD; no GitOps vLLM applications. Models are expected from the **OpenShift AI model catalog** (see **[CLOUD-AND-MODEL-CATALOG.md](CLOUD-AND-MODEL-CATALOG.md)**).
+
+| Wave | Application |
+|------|-------------|
+| 15 | `lvms` |
+| 20 | `nvidia-config` |
+| 30 | `dsc` |
+| 50 | `llamastack` |
+| 55 | RAG LLM Demo UI |
+| 56 | Open WebUI |
+
 If an operator stays **Progressing**, later waves wait. For stricter gates (e.g. wait for a `StorageClass`), consider a `sequenceJob` or `extraObjects` wait Job on the subscription as described in the Validated Patterns blog.

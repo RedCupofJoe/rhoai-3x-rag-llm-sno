@@ -1,0 +1,97 @@
+# Cluster group for cloud GPU nodes (e.g. AWS/Azure/GCP MachineSets).
+# - Skips Node Feature Discovery (NFD): cloud GPU nodes are labeled by the GPU operator / platform.
+# - Skips GitOps-managed vLLM InferenceServices: deploy models from the OpenShift AI model catalog
+#   (dashboard → single-model serving), then point LlamaStack and UIs at those predictors.
+#
+# Use: set main.clusterGroupName: prod-cloud in values-global.yaml (or hub config).
+# See docs/CLOUD-AND-MODEL-CATALOG.md.
+clusterGroup:
+  name: prod-cloud
+
+  namespaces:
+    - rag-llm-sno
+    - nvidia-gpu-operator
+    - cert-manager-operator
+    - redhat-ods-operator:
+        operatorGroup: true
+        targetNamespaces: []
+    - openshift-serverless
+    - openshift-storage:
+        operatorGroup: true
+        targetNamespaces:
+          - openshift-storage
+    - openshift-pipelines
+    - redhat-ods-applications
+    - rhoai-model-registries
+    - rhods-notebooks
+
+  subscriptions:
+    rhoai:
+      name: rhods-operator
+      namespace: redhat-ods-operator
+      channel: fast-3.x
+    certmanager:
+      name: openshift-cert-manager-operator
+      namespace: cert-manager-operator
+      source: redhat-operators
+      channel: stable-v1
+    nvidia:
+      name: gpu-operator-certified
+      namespace: nvidia-gpu-operator
+      source: certified-operators
+    lvms:
+      name: lvms-operator
+      namespace: openshift-storage
+
+  applications:
+    lvms:
+      name: lvms
+      namespace: openshift-storage
+      path: charts/lvms
+      annotations:
+        argocd.argoproj.io/sync-wave: "15"
+
+    nvidia-config:
+      name: nvidia-config
+      namespace: nvidia-gpu-operator
+      path: charts/nvidia-config
+      annotations:
+        argocd.argoproj.io/sync-wave: "20"
+
+    dsc:
+      name: dsc
+      namespace: rag-llm-sno
+      path: charts/dsc
+      annotations:
+        argocd.argoproj.io/sync-wave: "30"
+
+    llamastack:
+      name: llamastack
+      namespace: rag-llm-sno
+      path: charts/llamastack
+      extraValueFiles:
+        - $patternref/overrides/llamastack-cloud-catalog-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "50"
+
+    rag-llm-frontend:
+      name: rag-llm-frontend
+      namespace: rag-llm-sno
+      repoURL: https://github.com/validatedpatterns-sandbox/rag-llm-demo-ui
+      chartVersion: main
+      path: helm
+      extraValueFiles:
+        - $patternref/overrides/rag-llm-frontend-cloud-catalog-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "55"
+
+    openwebui:
+      name: openwebui
+      namespace: rag-llm-sno
+      repoURL: https://github.com/open-webui/helm-charts
+      chartVersion: main
+      path: charts/open-webui
+      extraValueFiles:
+        - $patternref/overrides/openwebui-cloud-catalog-values.yaml
+      annotations:
+        argocd.argoproj.io/sync-wave: "56"
